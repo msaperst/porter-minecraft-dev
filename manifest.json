@@ -1,0 +1,25 @@
+{
+    "format_version": 2,
+    "header": {
+        "name": "My First Minecraft Mod",
+        "description": "My first JavaScript add-on",
+        "version": [1, 0, 0],
+        "uuid": "d5797dcd-586b-4125-8250-ba2b5fbe3d0d"
+    },
+    "modules": [
+        {
+            "type": "script",
+            "language": "javascript",
+            "uuid": "8a815925-cad3-4d06-83fb-398cc99a7f5a",
+            "version": [1, 0, 0],
+            "entry": "scripts/main.js"
+        }
+    ],
+    "dependencies": [
+        {
+            "module_name": "@minecraft/server",
+            "version": "2.0.0"
+        }
+    ]
+}
+
