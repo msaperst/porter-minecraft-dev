@@ -4,7 +4,8 @@
         "name": "My First Minecraft Mod",
         "description": "My first JavaScript add-on",
         "version": [1, 0, 0],
-        "uuid": "d5797dcd-586b-4125-8250-ba2b5fbe3d0d"
+        "uuid": "d5797dcd-586b-4125-8250-ba2b5fbe3d0d",
+        "min_engine_version": [1, 26, 0]
     },
     "modules": [
         {
