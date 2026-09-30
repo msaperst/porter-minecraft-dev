@@ -2,8 +2,8 @@
 set -euo pipefail
 
 # QNAP cron jobs run with a minimal environment. Set the home directory and
-# PATH explicitly so git, Docker, Python, and our state directories resolve
-# the same way whether this script is run manually or by cron.
+# PATH explicitly so Docker and our state directories resolve the same way
+# whether this script is run manually or by cron.
 export HOME="/share/homes/msaperst"
 export PATH="/share/CACHEDEV1_DATA/.qpkg/container-station/bin:/share/CACHEDEV1_DATA/bin:/usr/local/bin:/usr/bin:/bin:$PATH"
 
@@ -35,8 +35,14 @@ fi
 trap 'rm -f "$LOCK_FILE"; rm -rf "$STAGE_DIR"' EXIT
 touch "$LOCK_FILE"
 
-# Find the commit currently at the tip of main.
-REMOTE_SHA="$(git ls-remote "$REPO_URL" "refs/heads/$BRANCH" | awk '{print $1}')"
+# Niaj does not have Git installed. Use a disposable Alpine container for all
+# Git operations and return only the remote SHA to the host.
+REMOTE_SHA="$(
+  docker run --rm alpine sh -c "
+    apk add --no-cache git >/dev/null &&
+    git ls-remote '$REPO_URL' 'refs/heads/$BRANCH' | awk '{print \$1}'
+  "
+)"
 
 if [[ -z "$REMOTE_SHA" ]]; then
   echo "[ERROR] Could not determine remote SHA for $BRANCH"
@@ -55,9 +61,16 @@ fi
 
 echo "[INFO] New main commit detected: $REMOTE_SHA"
 
-# Work from a clean checkout rather than modifying the live behavior pack.
+# Clone into a host staging directory through a disposable Git container.
+# The checkout is bind-mounted so the deployment container can read it later.
 rm -rf "$STAGE_DIR"
-git clone --quiet --depth 1 --branch "$BRANCH" "$REPO_URL" "$STAGE_DIR"
+mkdir -p "$STAGE_DIR"
+
+docker run --rm   -v "$STAGE_DIR:/staging"   alpine sh -c "
+    apk add --no-cache git >/dev/null &&
+    git clone --quiet --depth 1 --branch '$BRANCH' '$REPO_URL' /tmp/repo &&
+    cp -a /tmp/repo/. /staging/
+  "
 
 # Perform inexpensive validation before touching the running server.
 echo "[INFO] Validating staged add-on..."
@@ -68,8 +81,14 @@ if [[ ! -f "$STAGE_DIR/scripts/main.js" ]]; then
   exit 1
 fi
 
-# Make sure the checkout we are about to install is the commit we detected.
-STAGED_SHA="$(git -C "$STAGE_DIR" rev-parse HEAD)"
+# Verify the staged checkout is exactly the commit detected above. Again, Git
+# runs inside a disposable container rather than on the QNAP host.
+STAGED_SHA="$(
+  docker run --rm     -v "$STAGE_DIR:/staging:ro"     alpine sh -c "
+      apk add --no-cache git >/dev/null &&
+      git -C /staging rev-parse HEAD
+    "
+)"
 
 if [[ "$STAGED_SHA" != "$REMOTE_SHA" ]]; then
   echo "[ERROR] Staged SHA does not match remote SHA"
