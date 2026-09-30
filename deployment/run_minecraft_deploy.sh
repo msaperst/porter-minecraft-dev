@@ -13,9 +13,14 @@ REPO_URL="https://github.com/msaperst/porter-minecraft-dev.git"
 
 mkdir -p "$LOG_DIR" "$STATE_DIR"
 
-# Do the cheap GitHub comparison here before creating a log. Cron can run this
-# every minute without generating 1,440 no-op log files every day.
-REMOTE_SHA="$(git ls-remote "$REPO_URL" refs/heads/main | awk '{print $1}')"
+# Do the cheap GitHub comparison here before creating a log. Niaj has no Git,
+# so use the same disposable Alpine approach as the deployment script.
+REMOTE_SHA="$(
+  docker run --rm alpine sh -c "
+    apk add --no-cache git >/dev/null &&
+    git ls-remote '$REPO_URL' refs/heads/main | awk '{print \$1}'
+  "
+)"
 
 if [[ -z "$REMOTE_SHA" ]]; then
   exit 1
@@ -26,6 +31,7 @@ if [[ -f "$STATE_DIR/deployed_main_sha" ]]; then
   DEPLOYED_SHA="$(cat "$STATE_DIR/deployed_main_sha")"
 fi
 
+# Cron can run every minute without generating a log for unchanged commits.
 if [[ "$REMOTE_SHA" == "$DEPLOYED_SHA" ]]; then
   exit 0
 fi
