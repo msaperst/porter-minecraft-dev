@@ -31,8 +31,17 @@ if [[ -f "$LOCK_FILE" ]]; then
   exit 0
 fi
 
-# Always clean up the lock and staging checkout when the script exits.
-trap 'rm -f "$LOCK_FILE"; rm -rf "$STAGE_DIR"' EXIT
+# The staging checkout is created by a root-running Docker container, so its
+# files may not be removable by the QNAP user. Clean it up through Docker too.
+cleanup() {
+  rm -f "$LOCK_FILE"
+
+  docker run --rm \
+    -v "$STATE_DIR:/state" \
+    alpine sh -c 'rm -rf /state/staging' >/dev/null 2>&1 || true
+}
+
+trap cleanup EXIT
 touch "$LOCK_FILE"
 
 # Niaj does not have Git installed. Use a disposable Alpine container for all
