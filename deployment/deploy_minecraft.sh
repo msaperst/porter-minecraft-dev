@@ -129,22 +129,61 @@ echo "[INFO] Restarting Minecraft..."
 docker restart "$CONTAINER" >/dev/null
 sleep 8
 
-# Basic health checks: the container must still be running, BDS must finish
-# startup, and the expected behavior pack must appear in the startup logs.
+# Verify the new deployment. If either check fails, restore the previous pack
+# and restart BDS so the server returns to the last known-good state.
+ROLLBACK_REQUIRED=false
+
 if ! docker ps --format '{{.Names}}' | grep -Fxq "$CONTAINER"; then
   echo "[ERROR] Minecraft container is not running after deployment"
-  exit 1
+  ROLLBACK_REQUIRED=true
+else
+  LOGS="$(docker logs --since 30s "$CONTAINER" 2>&1)"
+
+  if ! printf '%s\n' "$LOGS" | grep -q "Server started"; then
+    echo "[ERROR] Minecraft did not report a successful startup"
+    ROLLBACK_REQUIRED=true
+  elif ! printf '%s\n' "$LOGS" | grep -q "My First Minecraft Mod"; then
+    echo "[ERROR] Porter behavior pack was not reported in the startup logs"
+    ROLLBACK_REQUIRED=true
+  fi
 fi
 
-LOGS="$(docker logs --since 30s "$CONTAINER" 2>&1)"
+if [[ "$ROLLBACK_REQUIRED" == "true" ]]; then
+  echo "[INFO] Rolling back to the previous behavior pack..."
 
-if ! printf '%s\n' "$LOGS" | grep -q "Server started"; then
-  echo "[ERROR] Minecraft did not report a successful startup"
-  exit 1
-fi
+  docker run --rm     -v "$VOLUME:/data"     alpine sh -c "
+      set -e
+      rm -rf '$PACK_DIR.failed'
+      mv '$PACK_DIR' '$PACK_DIR.failed'
+      mv '$PACK_DIR.previous' '$PACK_DIR'
+    "
 
-if ! printf '%s\n' "$LOGS" | grep -q "My First Minecraft Mod"; then
-  echo "[ERROR] Porter behavior pack was not reported in startup logs"
+  echo "[INFO] Restarting Minecraft after rollback..."
+  docker restart "$CONTAINER" >/dev/null
+  sleep 8
+
+  if ! docker ps --format '{{.Names}}' | grep -Fxq "$CONTAINER"; then
+    echo "[ERROR] Minecraft container is not running after rollback"
+    exit 1
+  fi
+
+  ROLLBACK_LOGS="$(docker logs --since 30s "$CONTAINER" 2>&1)"
+
+  if ! printf '%s\n' "$ROLLBACK_LOGS" | grep -q "Server started"; then
+    echo "[ERROR] Minecraft did not report a successful startup after rollback"
+    exit 1
+  fi
+
+  if ! printf '%s\n' "$ROLLBACK_LOGS" | grep -q "My First Minecraft Mod"; then
+    echo "[ERROR] Behavior pack was not reported after rollback"
+    exit 1
+  fi
+
+  # Keep the failed pack out of the live location, but don't let cleanup
+  # problems turn a successful rollback into another failure.
+  docker run --rm     -v "$VOLUME:/data"     alpine sh -c "rm -rf '$PACK_DIR.failed'" >/dev/null 2>&1 || true
+
+  echo "[ERROR] Deployment failed; previous version restored successfully"
   exit 1
 fi
 
