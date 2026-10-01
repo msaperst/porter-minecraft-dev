@@ -1,5 +1,16 @@
-import { world } from "@minecraft/server";
+import { world, system } from "@minecraft/server";
 import "./crit.js";
+import "./anvil.js";
+
+system.beforeEvents.startup.subscribe((initEvent) => {
+    initEvent.itemComponentRegistry.registerCustomComponent(
+        "porter:balance_book",
+        {
+            onUse(event) {
+            }
+        }
+    );
+});
 
 console.warn("PORTER MOD: main.js loaded");
 
