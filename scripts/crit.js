@@ -10,7 +10,9 @@ world.afterEvents.entityHitEntity.subscribe((event) => {
     }
 
     if (Math.random() < BASE_CRIT_CHANCE) {
-        event.hitEntity.dimension.spawnParticle(
+        player.sendMessage("§dCRITICAL HIT!");
+
+        player.spawnParticle(
             "minecraft:magical_critical_hit_emitter",
             event.hitEntity.location
         );
