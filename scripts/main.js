@@ -1,9 +1,9 @@
 import { world, system } from "@minecraft/server";
 import "./crit.js";
-import "./anvil.js";
+import "./custom_anvil.js";
 import "./strike.js";
 import "./penetrating.js";
-import "./strike_anvil.js";
+
 
 system.beforeEvents.startup.subscribe((initEvent) => {
     initEvent.itemComponentRegistry.registerCustomComponent(

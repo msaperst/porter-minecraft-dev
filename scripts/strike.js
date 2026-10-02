@@ -1,75 +1,70 @@
 import { world, system } from "@minecraft/server";
 
 const BASE_STRIKE_CHANCE = 0.03;
-
-// Remembers the Strike level of the trident a player is holding.
-const heldTridentLevels = new Map();
+const STRIKE_CODE = 321;
 
 
-// Check the player's held trident every tick.
-system.runInterval(() => {
-    for (const player of world.getAllPlayers()) {
-        const equipment = player.getComponent("minecraft:equippable");
+// --------------------------------------------------
+// GIVE STRIKE I BOOKS THEIR SECRET CODE
+// --------------------------------------------------
 
-        if (!equipment) {
-            continue;
-        }
+world.afterEvents.playerInventoryItemChange.subscribe((event) => {
+    const item = event.itemStack;
 
-        const mainhand = equipment.getEquipment("mainhand");
-
-        if (
-            mainhand &&
-            mainhand.typeId === "minecraft:trident"
-        ) {
-            const level = mainhand.getDynamicProperty(
-                "porter:strike_level"
-            );
-
-            if (typeof level === "number" && level > 0) {
-                heldTridentLevels.set(player.id, level);
-            }
-        }
-    }
-}, 1);
-
-
-// When a thrown trident is created,
-// copy the player's Strike level onto the projectile.
-world.afterEvents.entitySpawn.subscribe((event) => {
-    const projectile = event.entity;
-
-    if (projectile.typeId !== "minecraft:thrown_trident") {
+    if (!item) {
         return;
     }
 
-    const projectileComponent = projectile.getComponent(
-        "minecraft:projectile"
+    if (item.typeId !== "porter:strike_book_1") {
+        return;
+    }
+
+    const currentCode = item.getDynamicProperty(
+        "porter:strike_code"
     );
 
-    if (!projectileComponent) {
+    if (currentCode === STRIKE_CODE) {
         return;
     }
 
-    const owner = projectileComponent.owner;
+    system.run(() => {
+        const inventory = event.player.getComponent(
+            "minecraft:inventory"
+        );
 
-    if (!owner || owner.typeId !== "minecraft:player") {
-        return;
-    }
+        if (!inventory || !inventory.container) {
+            return;
+        }
 
-    const level = heldTridentLevels.get(owner.id);
+        const currentItem = inventory.container.getItem(
+            event.slot
+        );
 
-    if (typeof level !== "number" || level <= 0) {
-        return;
-    }
+        if (!currentItem) {
+            return;
+        }
 
-    projectile.setDynamicProperty(
-        "porter:strike_level",
-        level
-    );
+        if (currentItem.typeId !== "porter:strike_book_1") {
+            return;
+        }
+
+        currentItem.setDynamicProperty(
+            "porter:strike_code",
+            STRIKE_CODE
+        );
+
+        inventory.container.setItem(
+            event.slot,
+            currentItem
+        );
+    });
 });
 
 
-// SWORD MELEE HITS
+// --------------------------------------------------
+// SWORDS / MELEE
+// --------------------------------------------------
+
 world.afterEvents.entityHitEntity.subscribe((event) => {
     const player = event.damagingEntity;
     const target = event.hitEntity;
@@ -78,7 +73,9 @@ world.afterEvents.entityHitEntity.subscribe((event) => {
         return;
     }
 
-    const equipment = player.getComponent("minecraft:equippable");
+    const equipment = player.getComponent(
+        "minecraft:equippable"
+    );
 
     if (!equipment) {
         return;
@@ -120,7 +117,48 @@ world.afterEvents.entityHitEntity.subscribe((event) => {
 });
 
 
-// THROWN TRIDENT HITS
+// --------------------------------------------------
+// REMEMBER A STRIKE TRIDENT'S LEVEL
+// --------------------------------------------------
+
+system.runInterval(() => {
+    for (const player of world.getAllPlayers()) {
+        const equipment = player.getComponent(
+            "minecraft:equippable"
+        );
+
+        if (!equipment) {
+            continue;
+        }
+
+        const weapon = equipment.getEquipment("mainhand");
+
+        if (!weapon) {
+            continue;
+        }
+
+        if (weapon.typeId !== "minecraft:trident") {
+            continue;
+        }
+
+        const level = weapon.getDynamicProperty(
+            "porter:strike_level"
+        );
+
+        if (typeof level === "number" && level > 0) {
+            player.setDynamicProperty(
+                "porter:strike_trident_level",
+                level
+            );
+        }
+    }
+}, 1);
+
+
+// --------------------------------------------------
+// THROWN TRIDENTS
+// --------------------------------------------------
+
 world.afterEvents.projectileHitEntity.subscribe((event) => {
     const projectile = event.projectile;
 
@@ -168,5 +206,5 @@ world.afterEvents.projectileHitEntity.subscribe((event) => {
         target.location
     );
 
-    player.sendMessage("STRIKE!");
+    player.sendMessage("Bro got cooked");
 });
