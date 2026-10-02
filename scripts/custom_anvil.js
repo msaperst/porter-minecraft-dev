@@ -111,73 +111,240 @@ const ENCHANTMENT_BOOKS = {
         name: "Penetrating VII",
         description: "Ignores 70% of the target's armor"
     },
+
+
     // ==============================
-// BALANCE
-// ==============================
+    // BALANCE
+    // ==============================
 
-"porter:balance_book_1": {
-    type: "balance",
-    level: 1,
-    code: 501,
-    name: "Balance I",
-    description: "10% critical hit chance"
-},
+    "porter:balance_book_1": {
+        type: "balance",
+        level: 1,
+        code: 501,
+        name: "Balance I",
+        description: "10% critical hit chance"
+    },
 
-"porter:balance_book_2": {
-    type: "balance",
-    level: 2,
-    code: 502,
-    name: "Balance II",
-    description: "20% critical hit chance"
-},
+    "porter:balance_book_2": {
+        type: "balance",
+        level: 2,
+        code: 502,
+        name: "Balance II",
+        description: "20% critical hit chance"
+    },
 
-"porter:balance_book_3": {
-    type: "balance",
-    level: 3,
-    code: 503,
-    name: "Balance III",
-    description: "30% critical hit chance"
-},
+    "porter:balance_book_3": {
+        type: "balance",
+        level: 3,
+        code: 503,
+        name: "Balance III",
+        description: "30% critical hit chance"
+    },
 
-"porter:balance_book_4": {
-    type: "balance",
-    level: 4,
-    code: 504,
-    name: "Balance IV",
-    description: "40% critical hit chance"
-},
+    "porter:balance_book_4": {
+        type: "balance",
+        level: 4,
+        code: 504,
+        name: "Balance IV",
+        description: "40% critical hit chance"
+    },
 
-"porter:balance_book_5": {
-    type: "balance",
-    level: 5,
-    code: 505,
-    name: "Balance V",
-    description: "50% critical hit chance"
-},
+    "porter:balance_book_5": {
+        type: "balance",
+        level: 5,
+        code: 505,
+        name: "Balance V",
+        description: "50% critical hit chance"
+    },
 
-"porter:balance_book_6": {
-    type: "balance",
-    level: 6,
-    code: 506,
-    name: "Balance VI",
-    description: "60% critical hit chance"
-},
+    "porter:balance_book_6": {
+        type: "balance",
+        level: 6,
+        code: 506,
+        name: "Balance VI",
+        description: "60% critical hit chance"
+    },
 
-"porter:balance_book_7": {
-    type: "balance",
-    level: 7,
-    code: 507,
-    name: "Balance VII",
-    description: "70% critical hit chance"
-},
+    "porter:balance_book_7": {
+        type: "balance",
+        level: 7,
+        code: 507,
+        name: "Balance VII",
+        description: "70% critical hit chance"
+    },
 
-"porter:balance_book_8": {
-    type: "balance",
-    level: 8,
-    code: 508,
-    name: "Balance VIII",
-    description: "80% critical hit chance"
-}
+    "porter:balance_book_8": {
+        type: "balance",
+        level: 8,
+        code: 508,
+        name: "Balance VIII",
+        description: "80% critical hit chance"
+    },
+
+
+    // ==============================
+    // BLEEDING
+    // ==============================
+
+    "porter:bleeding_book_1": {
+        type: "bleeding",
+        level: 1,
+        code: 601,
+        name: "Bleeding I",
+        description: "Critical hits deal 1.65x damage"
+    },
+
+    "porter:bleeding_book_2": {
+        type: "bleeding",
+        level: 2,
+        code: 602,
+        name: "Bleeding II",
+        description: "Critical hits deal 1.80x damage"
+    },
+
+    "porter:bleeding_book_3": {
+        type: "bleeding",
+        level: 3,
+        code: 603,
+        name: "Bleeding III",
+        description: "Critical hits deal 1.95x damage"
+    },
+
+    "porter:bleeding_book_4": {
+        type: "bleeding",
+        level: 4,
+        code: 604,
+        name: "Bleeding IV",
+        description: "Critical hits deal 2.10x damage"
+    },
+
+    "porter:bleeding_book_5": {
+        type: "bleeding",
+        level: 5,
+        code: 605,
+        name: "Bleeding V",
+        description: "Critical hits deal 2.25x damage"
+    },
+
+    "porter:bleeding_book_6": {
+        type: "bleeding",
+        level: 6,
+        code: 606,
+        name: "Bleeding VI",
+        description: "Critical hits deal 2.40x damage"
+    },
+
+    "porter:bleeding_book_7": {
+        type: "bleeding",
+        level: 7,
+        code: 607,
+        name: "Bleeding VII",
+        description: "Critical hits deal 2.55x damage"
+    },
+
+    "porter:bleeding_book_8": {
+        type: "bleeding",
+        level: 8,
+        code: 608,
+        name: "Bleeding VIII",
+        description: "Critical hits deal 2.70x damage"
+    },
+
+    "porter:bleeding_book_9": {
+        type: "bleeding",
+        level: 9,
+        code: 609,
+        name: "Bleeding IX",
+        description: "Critical hits deal 2.85x damage"
+    },
+
+    "porter:bleeding_book_10": {
+        type: "bleeding",
+        level: 10,
+        code: 610,
+        name: "Bleeding X",
+        description: "Critical hits deal 3.00x damage"
+    },
+
+    "porter:bleeding_book_11": {
+        type: "bleeding",
+        level: 11,
+        code: 611,
+        name: "Bleeding XI",
+        description: "Critical hits deal 3.15x damage"
+    },
+
+    "porter:bleeding_book_12": {
+        type: "bleeding",
+        level: 12,
+        code: 612,
+        name: "Bleeding XII",
+        description: "Critical hits deal 3.30x damage"
+    },
+
+    "porter:bleeding_book_13": {
+        type: "bleeding",
+        level: 13,
+        code: 613,
+        name: "Bleeding XIII",
+        description: "Critical hits deal 3.45x damage"
+    },
+
+    "porter:bleeding_book_14": {
+        type: "bleeding",
+        level: 14,
+        code: 614,
+        name: "Bleeding XIV",
+        description: "Critical hits deal 3.60x damage"
+    },
+
+    "porter:bleeding_book_15": {
+        type: "bleeding",
+        level: 15,
+        code: 615,
+        name: "Bleeding XV",
+        description: "Critical hits deal 3.75x damage"
+    },
+
+    "porter:bleeding_book_16": {
+        type: "bleeding",
+        level: 16,
+        code: 616,
+        name: "Bleeding XVI",
+        description: "Critical hits deal 3.90x damage"
+    },
+
+    "porter:bleeding_book_17": {
+        type: "bleeding",
+        level: 17,
+        code: 617,
+        name: "Bleeding XVII",
+        description: "Critical hits deal 4.05x damage"
+    },
+
+    "porter:bleeding_book_18": {
+        type: "bleeding",
+        level: 18,
+        code: 618,
+        name: "Bleeding XVIII",
+        description: "Critical hits deal 4.20x damage"
+    },
+
+    "porter:bleeding_book_19": {
+        type: "bleeding",
+        level: 19,
+        code: 619,
+        name: "Bleeding XIX",
+        description: "Critical hits deal 4.35x damage"
+    },
+
+    "porter:bleeding_book_20": {
+        type: "bleeding",
+        level: 20,
+        code: 620,
+        name: "Bleeding XX",
+        description: "Critical hits deal 4.50x damage"
+    }
 };
 
 
@@ -202,18 +369,6 @@ function getInventory(player) {
 }
 
 
-function isWeapon(item) {
-    if (!item) {
-        return false;
-    }
-
-    return (
-        item.typeId.endsWith("_sword") ||
-        item.typeId === "minecraft:trident"
-    );
-}
-
-
 function getItemName(item) {
     if (!item) {
         return "Empty";
@@ -229,6 +384,15 @@ function getItemName(item) {
 }
 
 
+function getBookInfo(item) {
+    if (!item) {
+        return undefined;
+    }
+
+    return ENCHANTMENT_BOOKS[item.typeId];
+}
+
+
 function getEnchantmentLevel(item, type) {
     if (!item) {
         return 0;
@@ -238,16 +402,13 @@ function getEnchantmentLevel(item, type) {
 
     if (type === "strike") {
         propertyName = "porter:strike_level";
-    }
-
-    else if (type === "penetrating") {
+    } else if (type === "penetrating") {
         propertyName = "porter:penetrating_level";
-    }
-else if (type === "balance") {
-    propertyName = "porter:balance_level";
-}
-
-    else {
+    } else if (type === "balance") {
+        propertyName = "porter:balance_level";
+    } else if (type === "bleeding") {
+        propertyName = "porter:bleeding_level";
+    } else {
         return 0;
     }
 
@@ -260,14 +421,37 @@ else if (type === "balance") {
 
     return level;
 }
-
-
-function getBookInfo(item) {
-    if (!item) {
-        return undefined;
+function isCompatibleWeapon(weapon, enchantmentType) {
+    if (!weapon) {
+        return false;
     }
 
-    return ENCHANTMENT_BOOKS[item.typeId];
+    if (enchantmentType === "strike") {
+        return (
+            weapon.typeId.endsWith("_sword") ||
+            weapon.typeId === "minecraft:trident"
+        );
+    }
+
+    if (enchantmentType === "penetrating") {
+        return (
+            weapon.typeId.endsWith("_sword") ||
+            weapon.typeId === "minecraft:trident"
+        );
+    }
+
+    if (enchantmentType === "balance") {
+        return weapon.typeId.endsWith("_sword");
+    }
+
+    if (enchantmentType === "bleeding") {
+        return (
+            weapon.typeId.endsWith("_sword") ||
+            weapon.typeId === "minecraft:bow"
+        );
+    }
+
+    return false;
 }
 
 
@@ -295,21 +479,28 @@ function applyEnchantment(weapon, info) {
             "porter:strike_level",
             info.level
         );
-    }
 
-    else if (info.type === "penetrating") {
+    } else if (info.type === "penetrating") {
 
         weapon.setDynamicProperty(
             "porter:penetrating_level",
             info.level
         );
+
+    } else if (info.type === "balance") {
+
+        weapon.setDynamicProperty(
+            "porter:balance_level",
+            info.level
+        );
+
+    } else if (info.type === "bleeding") {
+
+        weapon.setDynamicProperty(
+            "porter:bleeding_level",
+            info.level
+        );
     }
-    else if (info.type === "balance") {
-    weapon.setDynamicProperty(
-        "porter:balance_level",
-        info.level
-    );
-}
 
 
     const oldLore = weapon.getLore();
@@ -344,11 +535,18 @@ async function openCustomAnvil(player) {
         slot < inventory.size;
         slot++
     ) {
+        const item = inventory.getItem(slot);
 
-        const item =
-            inventory.getItem(slot);
+        if (!item) {
+            continue;
+        }
 
-        if (!isWeapon(item)) {
+        const isPossibleWeapon =
+            item.typeId.endsWith("_sword") ||
+            item.typeId === "minecraft:trident" ||
+            item.typeId === "minecraft:bow";
+
+        if (!isPossibleWeapon) {
             continue;
         }
 
@@ -361,24 +559,21 @@ async function openCustomAnvil(player) {
 
     if (weapons.length === 0) {
 
-        const form =
-            new ActionFormData();
+        const form = new ActionFormData();
 
         form.title("Porter's Anvil");
 
         form.body(
-            "You need a sword or trident."
+            "You do not have a supported weapon."
         );
 
         form.button("Close");
 
         try {
             await form.show(player);
-        }
-
-        catch (error) {
+        } catch (error) {
             console.warn(
-                "Anvil error: " + error
+                "Anvil weapon form error: " + error
             );
         }
 
@@ -390,12 +585,9 @@ async function openCustomAnvil(player) {
     // CHOOSE WEAPON
     // ========================================
 
-    const weaponForm =
-        new ActionFormData();
+    const weaponForm = new ActionFormData();
 
-    weaponForm.title(
-        "Porter's Anvil"
-    );
+    weaponForm.title("Porter's Anvil");
 
     weaponForm.body(
         "Choose the weapon you want to enchant:"
@@ -419,26 +611,45 @@ async function openCustomAnvil(player) {
                 "penetrating"
             );
 
+        const balanceLevel =
+            getEnchantmentLevel(
+                entry.item,
+                "balance"
+            );
+
+        const bleedingLevel =
+            getEnchantmentLevel(
+                entry.item,
+                "bleeding"
+            );
+
 
         if (strikeLevel > 0) {
-
             buttonText +=
                 "\nStrike " +
                 strikeLevel;
         }
 
-
         if (penetratingLevel > 0) {
-
             buttonText +=
                 "\nPenetrating " +
                 penetratingLevel;
         }
 
+        if (balanceLevel > 0) {
+            buttonText +=
+                "\nBalance " +
+                balanceLevel;
+        }
 
-        weaponForm.button(
-            buttonText
-        );
+        if (bleedingLevel > 0) {
+            buttonText +=
+                "\nBleeding " +
+                bleedingLevel;
+        }
+
+
+        weaponForm.button(buttonText);
     }
 
 
@@ -448,13 +659,9 @@ async function openCustomAnvil(player) {
     let weaponResponse;
 
     try {
-
         weaponResponse =
             await weaponForm.show(player);
-    }
-
-    catch (error) {
-
+    } catch (error) {
         console.warn(
             "Weapon form error: " + error
         );
@@ -463,12 +670,8 @@ async function openCustomAnvil(player) {
     }
 
 
-    if (weaponResponse.canceled) {
-        return;
-    }
-
-
     if (
+        weaponResponse.canceled ||
         weaponResponse.selection === undefined ||
         weaponResponse.selection >= weapons.length
     ) {
@@ -488,13 +691,9 @@ async function openCustomAnvil(player) {
         );
 
 
-    if (
-        !selectedWeapon ||
-        !isWeapon(selectedWeapon)
-    ) {
-
+    if (!selectedWeapon) {
         player.sendMessage(
-            "That weapon is no longer available."
+            "The weapon is no longer available."
         );
 
         return;
@@ -502,11 +701,10 @@ async function openCustomAnvil(player) {
 
 
     // ========================================
-    // FIND ENCHANTMENT BOOKS
+    // FIND COMPATIBLE BOOKS
     // ========================================
 
     const books = [];
-
 
     for (
         let slot = 0;
@@ -521,6 +719,15 @@ async function openCustomAnvil(player) {
             getBookInfo(item);
 
         if (!info) {
+            continue;
+        }
+
+        if (
+            !isCompatibleWeapon(
+                selectedWeapon,
+                info.type
+            )
+        ) {
             continue;
         }
 
@@ -545,9 +752,23 @@ async function openCustomAnvil(player) {
 
     if (books.length === 0) {
 
-        player.sendMessage(
-            "You do not have a custom enchantment book."
+        const form = new ActionFormData();
+
+        form.title("Porter's Anvil");
+
+        form.body(
+            "You do not have an enchantment book that can be used on this weapon."
         );
+
+        form.button("Close");
+
+        try {
+            await form.show(player);
+        } catch (error) {
+            console.warn(
+                "Book form error: " + error
+            );
+        }
 
         return;
     }
@@ -585,13 +806,9 @@ async function openCustomAnvil(player) {
     let bookResponse;
 
     try {
-
         bookResponse =
             await bookForm.show(player);
-    }
-
-    catch (error) {
-
+    } catch (error) {
         console.warn(
             "Book form error: " + error
         );
@@ -600,12 +817,8 @@ async function openCustomAnvil(player) {
     }
 
 
-    if (bookResponse.canceled) {
-        return;
-    }
-
-
     if (
+        bookResponse.canceled ||
         bookResponse.selection === undefined ||
         bookResponse.selection >= books.length
     ) {
@@ -617,9 +830,7 @@ async function openCustomAnvil(player) {
         books[
             bookResponse.selection
         ];
-
-
-    // ========================================
+            // ========================================
     // CHECK CURRENT LEVEL
     // ========================================
 
@@ -662,17 +873,13 @@ async function openCustomAnvil(player) {
         "Weapon: " +
         getItemName(selectedWeapon) +
         "\n\n" +
-
         "Enchantment: " +
         selectedBook.info.name +
         "\n\n" +
-
         selectedBook.info.description +
         "\n\n" +
-
         "The book will be consumed."
     );
-
 
     confirmForm.button1("Apply");
     confirmForm.button2("Cancel");
@@ -681,13 +888,9 @@ async function openCustomAnvil(player) {
     let confirmResponse;
 
     try {
-
         confirmResponse =
             await confirmForm.show(player);
-    }
-
-    catch (error) {
-
+    } catch (error) {
         console.warn(
             "Confirmation error: " + error
         );
@@ -713,17 +916,13 @@ async function openCustomAnvil(player) {
             selectedWeaponSlot
         );
 
-
     const book =
         inventory.getItem(
             selectedBook.slot
         );
 
 
-    if (
-        !weapon ||
-        !isWeapon(weapon)
-    ) {
+    if (!weapon) {
 
         player.sendMessage(
             "The weapon is no longer available."
@@ -741,6 +940,26 @@ async function openCustomAnvil(player) {
 
         player.sendMessage(
             "The enchantment book is no longer available."
+        );
+
+        return;
+    }
+
+
+    // ========================================
+    // CHECK WEAPON COMPATIBILITY AGAIN
+    // ========================================
+
+    if (
+        !isCompatibleWeapon(
+            weapon,
+            bookInfo.type
+        )
+    ) {
+
+        player.sendMessage(
+            bookInfo.name +
+            " cannot be applied to that item."
         );
 
         return;
@@ -768,7 +987,33 @@ async function openCustomAnvil(player) {
 
 
     // ========================================
-    // APPLY ENCHANTMENT
+    // CHECK LEVEL AGAIN
+    // ========================================
+
+    const oldLevel =
+        getEnchantmentLevel(
+            weapon,
+            bookInfo.type
+        );
+
+
+    if (
+        oldLevel >=
+        bookInfo.level
+    ) {
+
+        player.sendMessage(
+            "That weapon already has an equal or higher " +
+            bookInfo.name +
+            " level."
+        );
+
+        return;
+    }
+
+
+    // ========================================
+    // APPLY
     // ========================================
 
     applyEnchantment(
@@ -784,7 +1029,7 @@ async function openCustomAnvil(player) {
 
 
     // ========================================
-    // CONSUME BOOK
+    // CONSUME ONE BOOK
     // ========================================
 
     if (book.amount > 1) {
@@ -795,9 +1040,8 @@ async function openCustomAnvil(player) {
             selectedBook.slot,
             book
         );
-    }
 
-    else {
+    } else {
 
         inventory.setItem(
             selectedBook.slot,
@@ -824,7 +1068,6 @@ world.beforeEvents.playerInteractWithBlock(
             return;
         }
 
-
         if (!isAnvil(event.block)) {
             return;
         }
@@ -834,7 +1077,8 @@ world.beforeEvents.playerInteractWithBlock(
         event.cancel = true;
 
 
-        // Open our custom anvil.
+        // Open our custom anvil after the
+        // interaction event finishes.
         system.run(() => {
             openCustomAnvil(event.player);
         });

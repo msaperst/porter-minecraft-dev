@@ -1,0 +1,23 @@
+{
+    "format_version": "1.26.0",
+    "minecraft:item": {
+        "description": {
+            "identifier": "porter:bleeding_book_9",
+            "menu_category": {
+                "category": "items"
+            }
+        },
+        "components": {
+            "minecraft:display_name": {
+                "value": "Bleeding IX"
+            },
+            "minecraft:max_stack_size": 1,
+            "minecraft:icon": "book_enchanted",
+            "minecraft:glint": true,
+            "minecraft:rarity": "rare",
+            "minecraft:lore": [
+                "Critical hits deal 2.85x damage"
+            ]
+        }
+    }
+}
