@@ -3,6 +3,7 @@ import "./crit.js";
 import "./anvil.js";
 import "./strike.js";
 import "./penetrating.js";
+import "./strike_anvil.js";
 
 system.beforeEvents.startup.subscribe((initEvent) => {
     initEvent.itemComponentRegistry.registerCustomComponent(
