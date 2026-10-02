@@ -110,7 +110,74 @@ const ENCHANTMENT_BOOKS = {
         code: 407,
         name: "Penetrating VII",
         description: "Ignores 70% of the target's armor"
-    }
+    },
+    // ==============================
+// BALANCE
+// ==============================
+
+"porter:balance_book_1": {
+    type: "balance",
+    level: 1,
+    code: 501,
+    name: "Balance I",
+    description: "10% critical hit chance"
+},
+
+"porter:balance_book_2": {
+    type: "balance",
+    level: 2,
+    code: 502,
+    name: "Balance II",
+    description: "20% critical hit chance"
+},
+
+"porter:balance_book_3": {
+    type: "balance",
+    level: 3,
+    code: 503,
+    name: "Balance III",
+    description: "30% critical hit chance"
+},
+
+"porter:balance_book_4": {
+    type: "balance",
+    level: 4,
+    code: 504,
+    name: "Balance IV",
+    description: "40% critical hit chance"
+},
+
+"porter:balance_book_5": {
+    type: "balance",
+    level: 5,
+    code: 505,
+    name: "Balance V",
+    description: "50% critical hit chance"
+},
+
+"porter:balance_book_6": {
+    type: "balance",
+    level: 6,
+    code: 506,
+    name: "Balance VI",
+    description: "60% critical hit chance"
+},
+
+"porter:balance_book_7": {
+    type: "balance",
+    level: 7,
+    code: 507,
+    name: "Balance VII",
+    description: "70% critical hit chance"
+},
+
+"porter:balance_book_8": {
+    type: "balance",
+    level: 8,
+    code: 508,
+    name: "Balance VIII",
+    description: "80% critical hit chance"
+}
 };
 
 
@@ -176,6 +243,9 @@ function getEnchantmentLevel(item, type) {
     else if (type === "penetrating") {
         propertyName = "porter:penetrating_level";
     }
+else if (type === "balance") {
+    propertyName = "porter:balance_level";
+}
 
     else {
         return 0;
@@ -234,6 +304,12 @@ function applyEnchantment(weapon, info) {
             info.level
         );
     }
+    else if (info.type === "balance") {
+    weapon.setDynamicProperty(
+        "porter:balance_level",
+        info.level
+    );
+}
 
 
     const oldLore = weapon.getLore();
