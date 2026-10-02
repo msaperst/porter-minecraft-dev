@@ -5,7 +5,7 @@
         "name": "Porter's Enchantments",
         "description": "Custom enchantments and gameplay systems",
         "uuid": "6f5d2e3a-8b61-4f7d-9c25-13b6e8a4d902",
-        "version": [1, 0, 1],
+        "version": [1, 0, 2],
         "min_engine_version": [1, 26, 0]
     },
 
@@ -14,14 +14,14 @@
             "description": "Porter's Enchantments Data",
             "type": "data",
             "uuid": "c31a7f54-2e98-46d1-a805-7b4f9c62e113",
-            "version": [1, 0, 1]
+            "version": [1, 0, 2]
         },
         {
             "description": "Porter's Enchantments Scripts",
             "type": "script",
             "language": "javascript",
             "uuid": "a84c196e-53d2-4b7f-91e6-d0285c743fa1",
-            "version": [1, 0, 1],
+            "version": [1, 0, 2],
             "entry": "scripts/main.js"
         }
     ],
