@@ -1,26 +1,39 @@
 {
     "format_version": 2,
+
     "header": {
-        "name": "My First Minecraft Mod",
-        "description": "My first JavaScript add-on",
-        "version": [1, 0, 0],
-        "uuid": "d5797dcd-586b-4125-8250-ba2b5fbe3d0d",
+        "name": "Porter's Enchantments",
+        "description": "Custom enchantments and gameplay systems",
+        "uuid": "6f5d2e3a-8b61-4f7d-9c25-13b6e8a4d902",
+        "version": [1, 0, 1],
         "min_engine_version": [1, 26, 0]
     },
+
     "modules": [
         {
+            "description": "Porter's Enchantments Data",
+            "type": "data",
+            "uuid": "c31a7f54-2e98-46d1-a805-7b4f9c62e113",
+            "version": [1, 0, 1]
+        },
+        {
+            "description": "Porter's Enchantments Scripts",
             "type": "script",
             "language": "javascript",
-            "uuid": "8a815925-cad3-4d06-83fb-398cc99a7f5a",
-            "version": [1, 0, 0],
+            "uuid": "a84c196e-53d2-4b7f-91e6-d0285c743fa1",
+            "version": [1, 0, 1],
             "entry": "scripts/main.js"
         }
     ],
+
     "dependencies": [
         {
             "module_name": "@minecraft/server",
-            "version": "1.0.0"
+            "version": "2.10.0"
+        },
+        {
+            "module_name": "@minecraft/server-ui",
+            "version": "2.2.0"
         }
     ]
 }
-
