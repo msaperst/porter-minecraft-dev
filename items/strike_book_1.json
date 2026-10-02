@@ -2,7 +2,7 @@
     "format_version": "1.26.0",
     "minecraft:item": {
         "description": {
-            "identifier": "strike_book_1",
+            "identifier": "porter:strike_book_1",
             "menu_category": {
                 "category": "items"
             }
