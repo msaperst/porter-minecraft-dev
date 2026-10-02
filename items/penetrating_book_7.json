@@ -1,0 +1,23 @@
+{
+    "format_version": "1.26.0",
+    "minecraft:item": {
+        "description": {
+            "identifier": "porter:penetrating_book_7",
+            "menu_category": {
+                "category": "items"
+            }
+        },
+        "components": {
+            "minecraft:display_name": {
+                "value": "Penetrating VII"
+            },
+            "minecraft:max_stack_size": 1,
+            "minecraft:icon": "book_enchanted",
+            "minecraft:glint": true,
+            "minecraft:rarity": "rare",
+            "minecraft:lore": [
+                "Ignores 70% of the target's armor"
+            ]
+        }
+    }
+}
