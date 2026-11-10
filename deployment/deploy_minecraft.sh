@@ -1,192 +1,151 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# QNAP cron jobs run with a minimal environment. Set the home directory and
-# PATH explicitly so Docker and our state directories resolve the same way
-# whether this script is run manually or by cron.
 export HOME="/share/homes/msaperst"
 export PATH="/share/CACHEDEV1_DATA/.qpkg/container-station/bin:/share/CACHEDEV1_DATA/bin:/usr/local/bin:/usr/bin:/bin:$PATH"
 
-# Source repository and branch that feed the development server.
 REPO_URL="https://github.com/msaperst/porter-minecraft-dev.git"
 BRANCH="main"
-
-# Minecraft development server details.
 VOLUME="minecraft-dev_minecraft-dev-data"
 CONTAINER="minecraft-dev-minecraft-1"
-PACK_DIR="/data/behavior_packs/porter-minecraft-dev"
-
-# Local deployment state. The deployed SHA is only updated after a successful
-# deployment so a failed commit will be retried on the next poll.
 STATE_DIR="$HOME/minecraft_deployment"
-DEPLOYED_SHA_FILE="$STATE_DIR/deployed_main_sha"
-LOCK_FILE="/tmp/minecraft_dev_deploy.lock"
 STAGE_DIR="$STATE_DIR/staging"
+SHA_FILE="$STATE_DIR/deployed_main_sha"
+LOCK_DIR="/tmp/minecraft_dev_deploy.lock.d"
 
 mkdir -p "$STATE_DIR"
-
-# Prevent two cron runs from deploying at the same time.
-if [[ -f "$LOCK_FILE" ]]; then
-  echo "[INFO] Another Minecraft deployment is already running. Exiting."
+if ! mkdir "$LOCK_DIR" 2>/dev/null; then
+  echo "[INFO] Deployment already running"
   exit 0
 fi
-
-# The staging checkout is created by a root-running Docker container, so its
-# files may not be removable by the QNAP user. Clean it up through Docker too.
 cleanup() {
-  rm -f "$LOCK_FILE"
-
-  docker run --rm \
-    -v "$STATE_DIR:/state" \
-    alpine sh -c 'rm -rf /state/staging' >/dev/null 2>&1 || true
+  docker run --rm -v "$STATE_DIR:/state" alpine sh -c 'rm -rf /state/staging' >/dev/null 2>&1 || true
+  rmdir "$LOCK_DIR" 2>/dev/null || true
 }
-
 trap cleanup EXIT
-touch "$LOCK_FILE"
 
-# Niaj does not have Git installed. Use a disposable Alpine container for all
-# Git operations and return only the remote SHA to the host.
-REMOTE_SHA="$(
-  docker run --rm alpine sh -c "
-    apk add --no-cache git >/dev/null &&
-    git ls-remote '$REPO_URL' 'refs/heads/$BRANCH' | awk '{print \$1}'
-  "
-)"
-
-if [[ -z "$REMOTE_SHA" ]]; then
-  echo "[ERROR] Could not determine remote SHA for $BRANCH"
-  exit 1
-fi
-
-DEPLOYED_SHA=""
-if [[ -f "$DEPLOYED_SHA_FILE" ]]; then
-  DEPLOYED_SHA="$(cat "$DEPLOYED_SHA_FILE")"
-fi
-
-# Nothing to do if this commit has already been deployed successfully.
-if [[ "$REMOTE_SHA" == "$DEPLOYED_SHA" ]]; then
-  exit 0
-fi
+REMOTE_SHA="$(docker run --rm alpine sh -ec "apk add --no-cache git >/dev/null; git ls-remote '$REPO_URL' 'refs/heads/$BRANCH' | awk '{print \$1}'")"
+[[ -n "$REMOTE_SHA" ]] || { echo '[ERROR] Unable to resolve remote commit'; exit 1; }
+[[ "$(cat "$SHA_FILE" 2>/dev/null || true)" != "$REMOTE_SHA" ]] || exit 0
 
 echo "[INFO] New main commit detected: $REMOTE_SHA"
+# All checkout work is isolated; the live pack is not modified yet.
+docker run --rm -v "$STATE_DIR:/state" alpine sh -ec 'rm -rf /state/staging; mkdir -p /state/staging'
+docker run --rm -v "$STAGE_DIR:/staging" alpine sh -ec "apk add --no-cache git >/dev/null; git clone --quiet --depth 1 --branch '$BRANCH' '$REPO_URL' /tmp/repo; cp -a /tmp/repo/. /staging/"
+STAGED_SHA="$(docker run --rm -v "$STAGE_DIR:/staging:ro" alpine sh -ec 'apk add --no-cache git >/dev/null; git -C /staging rev-parse HEAD')"
+[[ "$STAGED_SHA" == "$REMOTE_SHA" ]] || { echo '[ERROR] Checkout changed during deployment; retry next poll'; exit 1; }
 
-# Clone into a host staging directory through a disposable Git container.
-# The checkout is bind-mounted so the deployment container can read it later.
-rm -rf "$STAGE_DIR"
-mkdir -p "$STAGE_DIR"
+# Validate the manifest and extract the identity that the world must activate.
+/opt/bin/python3 - "$STAGE_DIR" <<'PY'
+import json, pathlib, sys, uuid
+root = pathlib.Path(sys.argv[1])
+m = json.loads((root / 'manifest.json').read_text())
+h = m['header']
+uuid.UUID(h['uuid'])
+version = h['version']
+assert isinstance(version, list) and len(version) == 3 and all(type(v) is int and v >= 0 for v in version)
+assert isinstance(h['name'], str) and h['name'].strip()
+modules = m['modules']
+assert any(x.get('type') == 'script' and (root / x['entry']).is_file() for x in modules)
+assert (root / 'scripts/main.js').is_file()
+print(f"[INFO] Validated pack: {h['name']} ({h['uuid']}, {version})")
+PY
 
-docker run --rm   -v "$STAGE_DIR:/staging"   alpine sh -c "
-    apk add --no-cache git >/dev/null &&
-    git clone --quiet --depth 1 --branch '$BRANCH' '$REPO_URL' /tmp/repo &&
-    cp -a /tmp/repo/. /staging/
-  "
+# A single disposable container owns all changes to the Minecraft data volume.
+# Snapshots are stored OUTSIDE behavior_packs so BDS cannot discover them.
+# The old world configuration is preserved byte-for-byte for rollback.
+echo "[INFO] Installing staged pack and synchronizing world activation..."
+docker run --rm -i \
+  -v "$VOLUME:/data" -v "$STAGE_DIR:/staging:ro" \
+  python:3.12-alpine python - <<'PYDEPLOY'
+import json, pathlib, shutil
+base = pathlib.Path('/data')
+packs = base / 'behavior_packs'
+live = packs / 'porter-minecraft-dev'
+world = base / 'worlds' / 'Bedrock level' / 'world_behavior_packs.json'
+backup = base / 'minecraft_deploy_backup'
+staged = pathlib.Path('/staging')
+new = json.loads((staged / 'manifest.json').read_text())['header']
+old_id = None
+if (live / 'manifest.json').is_file():
+    old_id = json.loads((live / 'manifest.json').read_text())['header']['uuid']
+if not world.is_file():
+    raise SystemExit(f'[ERROR] Missing world pack activation file: {world}')
+entries = json.loads(world.read_text())
+if not isinstance(entries, list):
+    raise SystemExit('[ERROR] World pack activation is not a list')
+# Preserve the existing activation list for rollback.
+if backup.exists():
+    shutil.rmtree(backup)
+backup.mkdir()
+shutil.copy2(world, backup / 'world_behavior_packs.json')
+if live.is_dir():
+    shutil.copytree(live, backup / 'pack')
+# Replace the old pack ID, or add this pack if no matching entry exists.
+new_entry = {'pack_id': new['uuid'], 'version': new['version']}
+updated = []
+for entry in entries:
+    if entry.get('pack_id') not in (old_id, new['uuid']):
+        updated.append(entry)
+updated.append(new_entry)
+# Stage the replacement outside the active pack directory.
+replacement = base / 'minecraft_deploy_candidate'
+if replacement.exists():
+    shutil.rmtree(replacement)
+shutil.copytree(staged, replacement, ignore=shutil.ignore_patterns('.git'))
+if live.exists():
+    shutil.rmtree(live)
+shutil.move(str(replacement), str(live))
+world.write_text(json.dumps(updated, indent=2) + '\n')
+print(f"[INFO] World now activates {new['name']} ({new['uuid']})")
+PYDEPLOY
 
-# Perform inexpensive validation before touching the running server.
-echo "[INFO] Validating staged add-on..."
-python3 -m json.tool "$STAGE_DIR/manifest.json" >/dev/null
-
-if [[ ! -f "$STAGE_DIR/scripts/main.js" ]]; then
-  echo "[ERROR] scripts/main.js is missing"
-  exit 1
-fi
-
-# Verify the staged checkout is exactly the commit detected above. Again, Git
-# runs inside a disposable container rather than on the QNAP host.
-STAGED_SHA="$(
-  docker run --rm     -v "$STAGE_DIR:/staging:ro"     alpine sh -c "
-      apk add --no-cache git >/dev/null &&
-      git -C /staging rev-parse HEAD
-    "
-)"
-
-if [[ "$STAGED_SHA" != "$REMOTE_SHA" ]]; then
-  echo "[ERROR] Staged SHA does not match remote SHA"
-  exit 1
-fi
-
-echo "[INFO] Deploying $STAGED_SHA..."
-
-# The Minecraft volume is not directly available on the QNAP host. Use a
-# disposable Alpine container to copy the staged checkout into the volume.
-# Build the replacement beside the live pack, then swap directories.
-docker run --rm   -v "$VOLUME:/data"   -v "$STAGE_DIR:/staging:ro"   alpine sh -c "
-    set -e
-
-    rm -rf '$PACK_DIR.new'
-    mkdir -p '$PACK_DIR.new'
-    cp -a /staging/. '$PACK_DIR.new/'
-
-    rm -rf '$PACK_DIR.previous'
-    if [ -d '$PACK_DIR' ]; then
-      mv '$PACK_DIR' '$PACK_DIR.previous'
-    fi
-
-    mv '$PACK_DIR.new' '$PACK_DIR'
-  "
-
-# BDS must restart to load the newly installed behavior pack.
-echo "[INFO] Restarting Minecraft..."
+# Compare only logs generated after THIS restart. Do not rely on pack names.
+EXPECTED_UUID="$(/opt/bin/python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["header"]["uuid"])' "$STAGE_DIR/manifest.json")"
+STARTED_AT="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+echo '[INFO] Restarting Minecraft...'
 docker restart "$CONTAINER" >/dev/null
-sleep 8
 
-# Verify the new deployment. If either check fails, restore the previous pack
-# and restart BDS so the server returns to the last known-good state.
-ROLLBACK_REQUIRED=false
+verify_new() {
+  local logs
+  for _ in $(seq 1 12); do
+    sleep 2
+    logs="$(docker logs --since "$STARTED_AT" "$CONTAINER" 2>&1)"
+    if printf '%s\n' "$logs" | grep -Fq 'Server started.'; then
+      if printf '%s\n' "$logs" | grep -F 'Pack Stack' | grep -Fq "id: $EXPECTED_UUID"; then
+        return 0
+      fi
+      echo "[ERROR] Server started without expected pack UUID $EXPECTED_UUID"
+      return 1
+    fi
+  done
+  echo '[ERROR] Server did not report successful startup'
+  return 1
+}
 
-if ! docker ps --format '{{.Names}}' | grep -Fxq "$CONTAINER"; then
-  echo "[ERROR] Minecraft container is not running after deployment"
-  ROLLBACK_REQUIRED=true
-else
-  LOGS="$(docker logs --since 30s "$CONTAINER" 2>&1)"
-
-  if ! printf '%s\n' "$LOGS" | grep -q "Server started"; then
-    echo "[ERROR] Minecraft did not report a successful startup"
-    ROLLBACK_REQUIRED=true
-  elif ! printf '%s\n' "$LOGS" | grep -q "My First Minecraft Mod"; then
-    echo "[ERROR] Porter behavior pack was not reported in the startup logs"
-    ROLLBACK_REQUIRED=true
-  fi
+if verify_new; then
+  printf '%s\n' "$STAGED_SHA" > "$SHA_FILE"
+  echo "[OK] Deployed $STAGED_SHA successfully"
+  exit 0
 fi
 
-if [[ "$ROLLBACK_REQUIRED" == "true" ]]; then
-  echo "[INFO] Rolling back to the previous behavior pack..."
+echo '[INFO] Restoring previous pack and world activation...'
+docker run --rm -i -v "$VOLUME:/data" python:3.12-alpine python - <<'PYROLLBACK'
+import pathlib, shutil
+base = pathlib.Path('/data')
+backup = base / 'minecraft_deploy_backup'
+live = base / 'behavior_packs' / 'porter-minecraft-dev'
+world = base / 'worlds' / 'Bedrock level' / 'world_behavior_packs.json'
+if not (backup / 'world_behavior_packs.json').exists():
+    raise SystemExit('[ERROR] Missing rollback snapshot')
+if live.exists():
+    shutil.rmtree(live)
+if (backup / 'pack').exists():
+    shutil.copytree(backup / 'pack', live)
+shutil.copy2(backup / 'world_behavior_packs.json', world)
+print('[INFO] Restored previous behavior pack and world configuration')
+PYROLLBACK
 
-  docker run --rm     -v "$VOLUME:/data"     alpine sh -c "
-      set -e
-      rm -rf '$PACK_DIR.failed'
-      mv '$PACK_DIR' '$PACK_DIR.failed'
-      mv '$PACK_DIR.previous' '$PACK_DIR'
-    "
-
-  echo "[INFO] Restarting Minecraft after rollback..."
-  docker restart "$CONTAINER" >/dev/null
-  sleep 8
-
-  if ! docker ps --format '{{.Names}}' | grep -Fxq "$CONTAINER"; then
-    echo "[ERROR] Minecraft container is not running after rollback"
-    exit 1
-  fi
-
-  ROLLBACK_LOGS="$(docker logs --since 30s "$CONTAINER" 2>&1)"
-
-  if ! printf '%s\n' "$ROLLBACK_LOGS" | grep -q "Server started"; then
-    echo "[ERROR] Minecraft did not report a successful startup after rollback"
-    exit 1
-  fi
-
-  if ! printf '%s\n' "$ROLLBACK_LOGS" | grep -q "My First Minecraft Mod"; then
-    echo "[ERROR] Behavior pack was not reported after rollback"
-    exit 1
-  fi
-
-  # Keep the failed pack out of the live location, but don't let cleanup
-  # problems turn a successful rollback into another failure.
-  docker run --rm     -v "$VOLUME:/data"     alpine sh -c "rm -rf '$PACK_DIR.failed'" >/dev/null 2>&1 || true
-
-  echo "[ERROR] Deployment failed; previous version restored successfully"
-  exit 1
-fi
-
-# Only a verified deployment becomes the new known-good commit.
-printf '%s\n' "$STAGED_SHA" > "$DEPLOYED_SHA_FILE"
-echo "[OK] Deployed $STAGED_SHA successfully"
+docker restart "$CONTAINER" >/dev/null
+echo '[ERROR] New pack failed verification; previous configuration restored. Deployment SHA unchanged.'
+exit 1
