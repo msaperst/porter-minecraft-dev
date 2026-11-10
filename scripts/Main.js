@@ -1,4 +1,6 @@
+
 import { world } from "@minecraft/server";
+import "./flash_book.js";
 
 console.warn("FLASH ENCHANTMENT LOADED!");
 
@@ -6,6 +8,7 @@ world.afterEvents.entityHitEntity.subscribe((event) => {
     const attacker = event.damagingEntity;
     const target = event.hitEntity;
 
+    // Only players can trigger Flash
     if (attacker.typeId !== "minecraft:player") return;
 
     target.dimension.spawnEntity(
