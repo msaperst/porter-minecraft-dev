@@ -22,10 +22,16 @@
       "entry": "scripts/main.js"
     }
   ],
-  "dependencies": [
-    {
-      "module_name": "@minecraft/server",
-      "version": "2.10.0"
-    }
-  ]
+  
+"dependencies": [
+  {
+    "module_name": "@minecraft/server",
+    "version": "2.10.0"
+  },
+  {
+    "module_name": "@minecraft/server-ui",
+    "version": "2.3.0"
+  }
+]
+
 }
