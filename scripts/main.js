@@ -1,15 +1,19 @@
 
-import { world } from "@minecraft/server";
+import { world, EquipmentSlot } from "@minecraft/server";
 import "./flash_book.js";
-
-console.warn("FLASH ENCHANTMENT LOADED!");
 
 world.afterEvents.entityHitEntity.subscribe((event) => {
     const attacker = event.damagingEntity;
     const target = event.hitEntity;
 
-    // Only players can trigger Flash
     if (attacker.typeId !== "minecraft:player") return;
+
+    const equippable = attacker.getComponent("minecraft:equippable");
+    const weapon = equippable.getEquipment(EquipmentSlot.Mainhand);
+
+    if (!weapon) return;
+
+    if (weapon.getDynamicProperty("porter:flash") !== true) return;
 
     target.dimension.spawnEntity(
         "minecraft:lightning_bolt",
