@@ -1,0 +1,31 @@
+
+{
+  "format_version": 2,
+  "header": {
+    "name": "Flash Enchantment",
+    "description": "A custom enchantment that summons lightning when you hit a mob.",
+    "uuid": "a6b28c91-4f73-4c2d-9e15-7b83a1d64021",
+    "version": [1, 0, 0],
+    "min_engine_version": [1, 26, 0]
+  },
+  "modules": [
+    {
+      "type": "data",
+      "uuid": "b7c39d02-5a84-4d3e-8f26-9c94b2e75130",
+      "version": [1, 0, 0]
+    },
+    {
+      "type": "script",
+      "language": "javascript",
+      "uuid": "c8d40e13-6b95-4e4f-9a37-0d05c3f86241",
+      "version": [1, 0, 0],
+      "entry": "scripts/main.js"
+    }
+  ],
+  "dependencies": [
+    {
+      "module_name": "@minecraft/server",
+      "version": "2.10.0"
+    }
+  ]
+}
