@@ -36,7 +36,7 @@ STAGED_SHA="$(docker run --rm -v "$STAGE_DIR:/staging:ro" alpine sh -ec 'apk add
 [[ "$STAGED_SHA" == "$REMOTE_SHA" ]] || { echo '[ERROR] Checkout changed during deployment; retry next poll'; exit 1; }
 
 # Validate the manifest and extract the identity that the world must activate.
-python3 - "$STAGE_DIR" <<'PY'
+/opt/bin/python3 - "$STAGE_DIR" <<'PY'
 import json, pathlib, sys, uuid
 root = pathlib.Path(sys.argv[1])
 m = json.loads((root / 'manifest.json').read_text())
@@ -101,7 +101,7 @@ print(f"[INFO] World now activates {new['name']} ({new['uuid']})")
 PYDEPLOY
 
 # Compare only logs generated after THIS restart. Do not rely on pack names.
-EXPECTED_UUID="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["header"]["uuid"])' "$STAGE_DIR/manifest.json")"
+EXPECTED_UUID="$(/opt/bin/python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["header"]["uuid"])' "$STAGE_DIR/manifest.json")"
 STARTED_AT="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 echo '[INFO] Restarting Minecraft...'
 docker restart "$CONTAINER" >/dev/null
