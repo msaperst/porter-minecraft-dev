@@ -1,6 +1,7 @@
 
 import { world, EquipmentSlot } from "@minecraft/server";
 import "./flash_book.js";
+import "./deadly_anvil.js";
 
 world.afterEvents.entityHitEntity.subscribe((event) => {
     const attacker = event.damagingEntity;
