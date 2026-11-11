@@ -1,6 +1,8 @@
 
 import { system, ItemStack } from "@minecraft/server";
 
+book.nameTag = "§dFlash";
+
 // Give the player a Blood enchanted book
 function giveBloodBook(player) {
     const book = new ItemStack("minecraft:enchanted_book", 1);
