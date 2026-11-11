@@ -5,7 +5,7 @@ import { system, ItemStack } from "@minecraft/server";
 function giveFlashBook(player) {
     const book = new ItemStack("minecraft:enchanted_book", 1);
 
-    book.nameTag = "§dFlash I";
+    book.nameTag = "§dFlash";
     book.setLore([
         "§7Causes lightning to strike",
         "§7the target when hit."
@@ -18,7 +18,7 @@ function giveFlashBook(player) {
         player.dimension.spawnItem(leftover, player.location);
     }
 
-    player.sendMessage("§dYou received Flash I!");
+    player.sendMessage("§dYou received Flash!");
 }
 
 system.afterEvents.scriptEventReceive.subscribe((event) => {

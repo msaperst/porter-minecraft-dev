@@ -14,10 +14,10 @@ async function openDeadlyAnvil(player) {
         .body(
             "§dCombine your sword and Flash book!\n\n" +
             "§fMAIN HAND: §7Hold your sword\n" +
-            "§fINVENTORY: §7Have a Flash I book anywhere\n\n" +
-            "§eSelect Apply Flash I when ready."
+            "§fINVENTORY: §7Have a Flash book anywhere\n\n" +
+            "§eSelect Apply Flash when ready."
         )
-        .button("§dApply Flash I")
+        .button("§dApply Flash")
         .button("Close");
 
     const response = await form.show(player);
@@ -47,7 +47,7 @@ async function openDeadlyAnvil(player) {
         if (
             item &&
             item.typeId === "minecraft:enchanted_book" &&
-            item.nameTag === "§dFlash I"
+            item.nameTag === "§dFlash"
         ) {
             bookSlot = i;
             break;
@@ -55,7 +55,7 @@ async function openDeadlyAnvil(player) {
     }
 
     if (bookSlot === -1) {
-        player.sendMessage("§cYou need a Flash I book!");
+        player.sendMessage("§cYou need a Flash book!");
         return;
     }
 
@@ -77,7 +77,7 @@ async function openDeadlyAnvil(player) {
         inventory.setItem(bookSlot, undefined);
     }
 
-    player.sendMessage("§d⚡ Flash I successfully applied!");
+    player.sendMessage("§d⚡ Flash successfully applied!");
 }
 
 // Open the menu when a player interacts with an anvil
