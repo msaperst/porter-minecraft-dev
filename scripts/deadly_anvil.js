@@ -1,7 +1,6 @@
 
 import {
     world,
-    system,
     EquipmentSlot
 } from "@minecraft/server";
 
@@ -12,20 +11,29 @@ async function openDeadlyAnvil(player) {
     const form = new ActionFormData()
         .title("§5⚡ Deadly Anvil ⚡")
         .body(
-            "§dCombine your sword and Flash book!\n\n" +
+            "§dCombine your sword and enchantment book!\n\n" +
             "§fMAIN HAND: §7Hold your sword\n" +
-            "§fINVENTORY: §7Have a Flash book anywhere\n\n" +
-            "§eSelect Apply Flash when ready."
+            "§fINVENTORY: §7Have a Flash or Blood book anywhere\n\n" +
+            "§eChoose an enchantment:"
         )
-        .button("§dApply Flash")
-        .button("Close");
+        .button("§d⚡ Apply Flash")
+        .button("§c🩸 Apply Blood")
+        .button("§7Close");
 
     const response = await form.show(player);
 
-    if (response.canceled || response.selection !== 0) return;
+    if (response.canceled || response.selection === 2) return;
+
+    const enchantment = response.selection === 0 ? "flash" : "blood";
+    const bookName = enchantment === "flash" ? "§dFlash" : "§cBlood";
+    const property = enchantment === "flash"
+        ? "porter:flash"
+        : "porter:blood";
 
     const equipment = player.getComponent("minecraft:equippable");
-    const inventory = player.getComponent("minecraft:inventory").container;
+    const inventory = player.getComponent("minecraft:inventory")?.container;
+
+    if (!equipment || !inventory) return;
 
     const weapon = equipment.getEquipment(EquipmentSlot.Mainhand);
 
@@ -34,11 +42,12 @@ async function openDeadlyAnvil(player) {
         return;
     }
 
-    if (weapon.getDynamicProperty("porter:flash") === true) {
-        player.sendMessage("§cThis sword already has Flash!");
+    if (weapon.getDynamicProperty(property) === true) {
+        player.sendMessage(`§cThis sword already has ${enchantment === "flash" ? "Flash" : "Blood"}!`);
         return;
     }
 
+    // Find the correct book
     let bookSlot = -1;
 
     for (let i = 0; i < inventory.size; i++) {
@@ -47,7 +56,7 @@ async function openDeadlyAnvil(player) {
         if (
             item &&
             item.typeId === "minecraft:enchanted_book" &&
-            item.nameTag === "§dFlash"
+            item.nameTag === bookName
         ) {
             bookSlot = i;
             break;
@@ -55,19 +64,24 @@ async function openDeadlyAnvil(player) {
     }
 
     if (bookSlot === -1) {
-        player.sendMessage("§cYou need a Flash book!");
+        player.sendMessage(`§cYou need a ${enchantment === "flash" ? "Flash" : "Blood"} book!`);
         return;
     }
 
-    weapon.setDynamicProperty("porter:flash", true);
+    // Apply enchantment
+    weapon.setDynamicProperty(property, true);
 
-    weapon.setLore([
-        ...weapon.getLore(),
-        "§dFlash I"
-    ]);
+    const lore = weapon.getLore() ?? [];
+
+    lore.push(
+        enchantment === "flash" ? "§dFlash" : "§cBlood"
+    );
+
+    weapon.setLore(lore);
 
     equipment.setEquipment(EquipmentSlot.Mainhand, weapon);
 
+    // Consume one book
     const book = inventory.getItem(bookSlot);
 
     if (book.amount > 1) {
@@ -77,10 +91,14 @@ async function openDeadlyAnvil(player) {
         inventory.setItem(bookSlot, undefined);
     }
 
-    player.sendMessage("§d⚡ Flash successfully applied!");
+    player.sendMessage(
+        enchantment === "flash"
+            ? "§d⚡ Flash successfully applied!"
+            : "§c🩸 Blood successfully applied!"
+    );
 }
 
-// Open the menu when a player interacts with an anvil
+// Open menu when interacting with an anvil
 world.afterEvents.playerInteractWithBlock.subscribe((event) => {
     const block = event.block;
     const player = event.player;
