@@ -11,7 +11,7 @@ import { ActionFormData } from "@minecraft/server-ui";
 function giveFlashBook(player) {
     const book = new ItemStack("minecraft:enchanted_book", 1);
 
-    book.nameTag = "§dFlash I";
+    book.nameTag = "§dFlash";
     book.setLore([
         "§7Causes lightning to strike",
         "§7the target when hit."
@@ -24,7 +24,7 @@ function giveFlashBook(player) {
         player.dimension.spawnItem(leftover, player.location);
     }
 
-    player.sendMessage("§dYou received Flash I!");
+    player.sendMessage("§dYou received Flash!");
 }
 
 // Open Deadly Anvil
@@ -37,7 +37,7 @@ async function openDeadlyAnvil(player) {
             "§fINVENTORY: §7Have a Flash I book anywhere\n\n" +
             "§eSelect Apply Flash I when ready."
         )
-        .button("§dApply Flash I")
+        .button("§dApply Flash")
         .button("Close");
 
     const response = await form.show(player);
@@ -63,7 +63,7 @@ async function openDeadlyAnvil(player) {
         return;
     }
 
-    // Find a Flash I book
+    // Find a Flash book
     let bookSlot = -1;
 
     for (let i = 0; i < inventory.size; i++) {
@@ -80,7 +80,7 @@ async function openDeadlyAnvil(player) {
     }
 
     if (bookSlot === -1) {
-        player.sendMessage("§cYou need a Flash I book!");
+        player.sendMessage("§cYou need a Flash book!");
         return;
     }
 
@@ -89,7 +89,7 @@ async function openDeadlyAnvil(player) {
 
     weapon.setLore([
         ...weapon.getLore(),
-        "§dFlash I"
+        "§dFlash"
     ]);
 
     equipment.setEquipment(EquipmentSlot.Mainhand, weapon);
@@ -104,7 +104,7 @@ async function openDeadlyAnvil(player) {
         inventory.setItem(bookSlot, undefined);
     }
 
-    player.sendMessage("§d⚡ Flash I successfully applied!");
+    player.sendMessage("§d⚡ Flash successfully applied!");
 }
 
 // Listen for Minecraft commands
