@@ -1,23 +1,22 @@
 
-
 import {
     world,
     system,
     EquipmentSlot,
     EntityDamageCause
 } from "@minecraft/server";
+
 import "./blood_book.js";
 import "./flash_book.js";
 import "./deadly_anvil.js";
 
 // BLOOD ENCHANTMENT
-// Cancels the normal sword damage and reapplies it as magic damage,
-// which bypasses normal armor reduction.
 world.beforeEvents.entityHurt.subscribe((event) => {
     const attacker = event.damageSource.damagingEntity;
     const target = event.hurtEntity;
 
     if (!attacker || attacker.typeId !== "minecraft:player") return;
+    if (event.damageSource.cause !== EntityDamageCause.entityAttack) return;
 
     const equippable = attacker.getComponent("minecraft:equippable");
     if (!equippable) return;
@@ -27,21 +26,17 @@ world.beforeEvents.entityHurt.subscribe((event) => {
 
     if (weapon.getDynamicProperty("porter:blood") !== true) return;
 
-    // Only replace normal melee attacks.
-    if (event.damageSource.cause !== EntityDamageCause.entityAttack) return;
-
     const damage = event.damage;
-
-    // Cancel the original damage so it is not applied twice.
     event.cancel = true;
 
-    // Apply the same damage using the magic damage cause.
     system.run(() => {
         try {
-            target.applyDamage(damage, {
-                cause: EntityDamageCause.magic,
-                damagingEntity: attacker
-            });
+            if (target.isValid()) {
+                target.applyDamage(damage, {
+                    cause: EntityDamageCause.magic,
+                    damagingEntity: attacker
+                });
+            }
         } catch (error) {
             console.warn("Blood damage error: " + error);
         }
@@ -49,23 +44,36 @@ world.beforeEvents.entityHurt.subscribe((event) => {
 });
 
 // FLASH ENCHANTMENT
-// Lightning strikes only when the player hits a target.
 world.afterEvents.entityHitEntity.subscribe((event) => {
     const attacker = event.damagingEntity;
     const target = event.hitEntity;
 
-    if (attacker.typeId !== "minecraft:player") return;
+    // Only players can activate Flash.
+    if (!attacker || attacker.typeId !== "minecraft:player") return;
 
-    const equippable = attacker.getComponent("minecraft:equippable");
-    if (!equippable) return;
+    try {
+        const equippable = attacker.getComponent("minecraft:equippable");
+        if (!equippable) return;
 
-    const weapon = equippable.getEquipment(EquipmentSlot.Mainhand);
-    if (!weapon) return;
+        const weapon = equippable.getEquipment(EquipmentSlot.Mainhand);
+        if (!weapon) return;
 
-    if (weapon.getDynamicProperty("porter:flash") !== true) return;
+        // Check whether the sword has Flash.
+        if (weapon.getDynamicProperty("porter:flash") !== true) return;
 
-    target.dimension.spawnEntity(
-        "minecraft:lightning_bolt",
-        target.location
-    );
+        // Strike the target with lightning.
+        if (!target.isValid()) return;
+
+        target.dimension.spawnEntity(
+            "minecraft:lightning_bolt",
+            {
+                x: target.location.x,
+                y: target.location.y,
+                z: target.location.z
+            }
+        );
+
+    } catch (error) {
+        console.warn("Flash error: " + error);
+    }
 });

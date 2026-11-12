@@ -6,14 +6,13 @@ import {
 
 import { ActionFormData } from "@minecraft/server-ui";
 
-// Open Deadly Anvil
 async function openDeadlyAnvil(player) {
     const form = new ActionFormData()
         .title("§5⚡ Deadly Anvil ⚡")
         .body(
             "§dCombine your sword and enchantment book!\n\n" +
             "§fMAIN HAND: §7Hold your sword\n" +
-            "§fINVENTORY: §7Have a Flash or Blood book anywhere\n\n" +
+            "§fINVENTORY: §7Have a Flash or Blood book\n\n" +
             "§eChoose an enchantment:"
         )
         .button("§d⚡ Apply Flash")
@@ -25,6 +24,7 @@ async function openDeadlyAnvil(player) {
     if (response.canceled || response.selection === 2) return;
 
     const enchantment = response.selection === 0 ? "flash" : "blood";
+
     const bookName = enchantment === "flash" ? "§dFlash" : "§cBlood";
     const property = enchantment === "flash"
         ? "porter:flash"
@@ -43,11 +43,10 @@ async function openDeadlyAnvil(player) {
     }
 
     if (weapon.getDynamicProperty(property) === true) {
-        player.sendMessage(`§cThis sword already has ${enchantment === "flash" ? "Flash" : "Blood"}!`);
+        player.sendMessage(`§cYour sword already has ${enchantment === "flash" ? "Flash" : "Blood"}!`);
         return;
     }
 
-    // Find the correct book
     let bookSlot = -1;
 
     for (let i = 0; i < inventory.size; i++) {
@@ -68,20 +67,14 @@ async function openDeadlyAnvil(player) {
         return;
     }
 
-    // Apply enchantment
     weapon.setDynamicProperty(property, true);
 
     const lore = weapon.getLore() ?? [];
-
-    lore.push(
-        enchantment === "flash" ? "§dFlash" : "§cBlood"
-    );
-
+    lore.push(enchantment === "flash" ? "§dFlash" : "§cBlood");
     weapon.setLore(lore);
 
     equipment.setEquipment(EquipmentSlot.Mainhand, weapon);
 
-    // Consume one book
     const book = inventory.getItem(bookSlot);
 
     if (book.amount > 1) {
@@ -98,10 +91,8 @@ async function openDeadlyAnvil(player) {
     );
 }
 
-// Open menu when interacting with an anvil
 world.afterEvents.playerInteractWithBlock.subscribe((event) => {
     const block = event.block;
-    const player = event.player;
 
     if (
         block.typeId !== "minecraft:anvil" &&
@@ -111,7 +102,7 @@ world.afterEvents.playerInteractWithBlock.subscribe((event) => {
         return;
     }
 
-    openDeadlyAnvil(player).catch((error) => {
+    openDeadlyAnvil(event.player).catch((error) => {
         console.warn("Deadly Anvil error: " + error);
     });
 });
