@@ -1,52 +1,32 @@
 
 import { system, ItemStack } from "@minecraft/server";
 
-const FLASH_BOOK_NAME = "§dFlash";
-
-// Create and give a Flash book
+// Give the player a Flash I book
 function giveFlashBook(player) {
-    try {
-        const inventoryComponent = player.getComponent("minecraft:inventory");
-        const inventory = inventoryComponent?.container;
+    const book = new ItemStack("minecraft:enchanted_book", 1);
 
-        if (!inventory) {
-            player.sendMessage("§cCould not access your inventory!");
-            return;
-        }
+    book.nameTag = "§dFlash I";
+    book.setLore([
+        "§7Causes lightning to strike",
+        "§7the target when hit."
+    ]);
 
-        const book = new ItemStack("minecraft:enchanted_book", 1);
+    const inventory = player.getComponent("minecraft:inventory").container;
+    const leftover = inventory.addItem(book);
 
-        book.nameTag = FLASH_BOOK_NAME;
-
-        book.setLore([
-            "§7FLASH ENCHANTMENT",
-            "§8----------------",
-            "§7Summons lightning",
-            "§7when you hit a target.",
-            "§8No levels required."
-        ]);
-
-        const leftover = inventory.addItem(book);
-
-        if (leftover) {
-            player.dimension.spawnItem(leftover, player.location);
-        }
-
-        player.sendMessage("§d⚡ You received the Flash book!");
-
-    } catch (error) {
-        console.warn("Flash book error: " + error);
-        player.sendMessage("§cSomething went wrong giving you Flash!");
+    if (leftover) {
+        player.dimension.spawnItem(leftover, player.location);
     }
+
+    player.sendMessage("§dYou received Flash I!");
 }
 
-// Command: /scriptevent porter:flashbook
 system.afterEvents.scriptEventReceive.subscribe((event) => {
-    if (event.id !== "porter:flashbook") return;
-
     const player = event.sourceEntity;
 
     if (!player || player.typeId !== "minecraft:player") return;
 
-    giveFlashBook(player);
+    if (event.id === "porter:flashbook") {
+        giveFlashBook(player);
+    }
 });
